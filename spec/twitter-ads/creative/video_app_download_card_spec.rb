@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# Copyright (C) 2015 Twitter, Inc.
+# Copyright (C) 2019 Twitter, Inc.
 
 require 'spec_helper'
 
@@ -23,10 +23,10 @@ describe TwitterAds::Creative::VideoAppDownloadCard do
 
   # check model properties
   subject { described_class.new(account) }
-  read  = %w(id preview_url video_url video_poster_url deleted created_at updated_at)
+  read  = %w(id video_url video_poster_url deleted created_at updated_at)
   write = %w(
     name
-    app_country_code
+    country_code
     iphone_app_id
     iphone_deep_link
     ipad_app_id
