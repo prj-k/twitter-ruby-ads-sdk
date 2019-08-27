@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-# Copyright (C) 2015 Twitter, Inc.
+# Copyright (C) 2019 Twitter, Inc.
 
 module TwitterAds
   class TailoredAudience
@@ -25,19 +25,13 @@ module TwitterAds
     property :targetable, type: :bool, read_only: true
     property :targetable_types, read_only: true
 
-    RESOURCE_COLLECTION  = "/#{TwitterAds::API_VERSION}/" +
-                           'accounts/%{account_id}/tailored_audiences'.freeze # @api private
-    RESOURCE             = "/#{TwitterAds::API_VERSION}/" +
-                           'accounts/%{account_id}/tailored_audiences/%{id}'.freeze # @api private
-    RESOURCE_UPDATE      = "/#{TwitterAds::API_VERSION}/" +
-                           'accounts/%{account_id}/tailored_audience_changes'.freeze # @api private
-    RESOURCE_MEMBERSHIPS = "/#{TwitterAds::API_VERSION}/" +
-                           'tailored_audience_memberships'.freeze # @api private
-    RESOURCE_USERS       = "/#{TwitterAds::API_VERSION}/" +
-                           'accounts/%{account_id}/tailored_audiences/%{id}/users'.freeze # @api private
-    # @api private
-    GLOBAL_OPT_OUT = "/#{TwitterAds::API_VERSION}/" +
-                     'accounts/%{account_id}/tailored_audiences/global_opt_out'.freeze
+    RESOURCE_COLLECTION  = "/#{TwitterAds::API_VERSION}/" \
+                           'accounts/%{account_id}/tailored_audiences' # @api private
+    RESOURCE             = "/#{TwitterAds::API_VERSION}/" \
+                           'accounts/%{account_id}/tailored_audiences/%{id}' # @api private
+    RESOURCE_USERS       = "/#{TwitterAds::API_VERSION}/" \
+                           'accounts/%{account_id}/tailored_audiences/' \
+                           '%{id}/users' # @api private
 
     LIST_TYPES = %w(
       EMAIL
@@ -79,45 +73,6 @@ module TwitterAds
         audience.from_response(response.body[:data])
       end
 
-      # Updates the global opt-out list for the specified advertiser account.
-      #
-      # @example
-      #   TailoredAudience.opt_out(account, '/path/to/file', 'EMAIL')
-      #
-      # @param account [Account] The account object instance.
-      # @param file_path [String] The path to the file to be uploaded.
-      # @param list_type [String] The tailored audience list type.
-      #
-      # @since 0.3.0
-      #
-      # @return [Boolean] The result of the opt-out update.
-      def opt_out(account, file_path, list_type)
-        upload   = TwitterAds::TONUpload.new(account.client, file_path)
-        params   = { input_file_path: upload.perform, list_type: list_type }
-        resource = GLOBAL_OPT_OUT % { account_id: account.id }
-        Request.new(account.client, :put, resource, params: params).perform
-        true
-      end
-
-    end
-
-    # Updates the current tailored audience instance.
-    #
-    # @example
-    #   audience = account.tailored_audiences('xyz')
-    #   audience.update('/path/to/file', 'EMAIL', 'REPLACE')
-    #
-    # @param file_path [String] The path to the file to be uploaded.
-    # @param list_type [String] The tailored audience list type.
-    # @param operation [String] The update operation type (Default: 'ADD').
-    #
-    # @since 0.3.0
-    #
-    # @return [TailoredAudience] [description]
-    def update(file_path, list_type, operation = 'ADD')
-      upload = TwitterAds::TONUpload.new(account.client, file_path)
-      update_audience(self, upload.perform, list_type, operation)
-      reload!
     end
 
     # Deletes the current tailored audience instance.
@@ -136,60 +91,10 @@ module TwitterAds
       from_response(response.body[:data])
     end
 
-    # Returns the status of all changes for the current tailored audience instance.
-    #
-    # @example
-    #   audience.status
-    #
-    # @since 0.3.0
-    #
-    # @return [Hash] Returns a hash object representing the tailored audience status.
-    def status
-      return nil unless id
-      resource = RESOURCE_UPDATE % { account_id: account.id }
-      request = Request.new(account.client, :get, resource, params: to_params)
-      Cursor.new(nil, request).to_a.select { |change| change[:tailored_audience_id] == id }
-    end
-
     # This is a private API and requires whitelisting from Twitter.
     #
-    # This real-time API will enable partners to upload batched tailored audience information
-    # to Twitter for processing in real-time
-    #
-    # @example
-    #   TailoredAudience.memberships(
-    #     account,
-    #     [
-    #       {
-    #         "operation_type" => "Update",
-    #         "params" => {
-    #           "user_identifier" => "IUGKJHG-UGJHVHJ",
-    #           "user_identifier_type" => "TAWEB_PARTNER_USER_ID",
-    #           "audience_names" => "Recent Site Visitors, Recent Sign-ups",
-    #           "advertiser_account_id" => "43853bhii879"
-    #         }
-    #       },
-    #     ]
-    #   )
-    #
-    # @return success_count, total_count
-    def self.memberships(account, params)
-      resource = RESOURCE_MEMBERSHIPS
-      headers = { 'Content-Type' => 'application/json' }
-      response = TwitterAds::Request.new(account.client,
-                                         :post,
-                                         resource,
-                                         headers: headers,
-                                         body: params.to_json).perform
-      success_count = response.body[:data][0][:success_count]
-      total_count = response.body[:request][0][:total_count]
-
-      [success_count, total_count]
-    end
-
-    # This is a private API and requires whitelisting from Twitter.
-    #
-    # This endpoint will allow partners to add, update and remove users from a given tailored_audience_id.
+    # This endpoint will allow partners to add, update and remove users from a given
+    # tailored_audience_id.
     # The endpoint will also accept multiple user identifier types per user as well.
     #
     # @example
@@ -232,5 +137,100 @@ module TwitterAds
       [success_count, total_count]
     end
 
+  end
+
+  class TailoredAudiencePermission
+
+    include TwitterAds::DSL
+    include TwitterAds::Resource
+
+    attr_reader :account
+
+    # read-only
+    property :created_at, type: :time, read_only: true
+    property :updated_at, type: :time, read_only: true
+    property :deleted, type: :bool, read_only: true
+
+    property :id
+    property :tailored_audience_id
+    property :granted_account_id
+    property :permission_level
+
+    RESOURCE_COLLECTION  = "/#{TwitterAds::API_VERSION}/" \
+                           'accounts/%{account_id}/tailored_audiences/' \
+                           '%{tailored_audience_id}/permissions' # @api private
+    RESOURCE             = "/#{TwitterAds::API_VERSION}/" \
+                           'accounts/%{account_id}/tailored_audiences/' \
+                           '%{tailored_audience_id}/permissions/%{id}' # @api private
+
+    def initialize(account)
+      @account = account
+      self
+    end
+
+    class << self
+
+      # Retrieve details for some or
+      # all permissions associated with the specified tailored audience.
+      #
+      # @exapmle
+      #   permissions = TailoredAudiencePermission.all(account, '36n4f')
+      #
+      # @param account [Account] The account object instance.
+      # @param tailored_audience_id [String] The tailored audience id.
+      #
+      # @since 5.2.0
+      #
+      # @return [TailoredAudiencePermission] The tailored audience permission instance.
+      def all(account, tailored_audience_id, opts = {})
+        params = {}.merge!(opts)
+        resource = RESOURCE_COLLECTION % {
+          account_id: account.id,
+          tailored_audience_id: tailored_audience_id
+        }
+        request = Request.new(account.client, :get, resource, params: params)
+        Cursor.new(self, request, init_with: [account])
+      end
+
+    end
+
+    # Saves or updates the current object instance
+    # depending on the presence of `object.tailored_audience_id`.
+    #
+    # @exapmle
+    #   object.save
+    #
+    # @since 5.2.0
+    #
+    # @return [self] Returns the instance refreshed from the API.
+    def save
+      resource = RESOURCE_COLLECTION % {
+        account_id: account.id,
+        tailored_audience_id: tailored_audience_id
+      }
+      params = to_params
+      response = Request.new(account.client, :post, resource, params: params).perform
+      from_response(response.body[:data])
+    end
+
+    # Deletes the current or specified tailored audience permission.
+    #
+    # @example
+    #   object.delete!
+    #
+    # Note: calls to this method are destructive and irreverisble.
+    #
+    # @since 5.2.0
+    #
+    # @return [self] Returns the instance refreshed from the API.
+    def delete!
+      resource = RESOURCE % {
+        account_id: account.id,
+        tailored_audience_id: tailored_audience_id,
+        id: @id
+      }
+      response = Request.new(account.client, :delete, resource).perform
+      from_response(response.body[:data])
+    end
   end
 end
