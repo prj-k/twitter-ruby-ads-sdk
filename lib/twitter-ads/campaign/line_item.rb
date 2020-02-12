@@ -32,7 +32,6 @@ module TwitterAds
     property :primary_web_event_tag
     property :product_type
     property :start_time, type: :time
-    property :target_cpa_local_micro
     property :total_budget_amount_local_micro
 
     # beta (not yet generally available)
