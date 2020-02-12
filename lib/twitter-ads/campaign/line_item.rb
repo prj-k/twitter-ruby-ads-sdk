@@ -34,8 +34,6 @@ module TwitterAds
     property :start_time, type: :time
     property :target_cpa_local_micro
     property :total_budget_amount_local_micro
-    property :start_time
-    property :end_time
 
     # beta (not yet generally available)
     property :advertiser_user_id
