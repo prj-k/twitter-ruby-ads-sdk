@@ -70,6 +70,29 @@ module TwitterAds
         warn message
       end
 
+      def extract_response_headers(headers)
+        values = {}
+        # only get "X-${name}" custom response headers
+        headers.each { |key, value|
+          if key =~ /^x-/
+            values[key.gsub(/^x-/, '').tr('-', '_')] = \
+              value.first =~ /^[0-9]*$/ ? value.first.to_i : value.first
+          end
+        }
+        values
+      end
+
+      def flatten_params(args)
+        params = args
+        params.each { |key, value|
+          if value.is_a?(Array)
+            next if value.empty?
+            params[key] = value.join(',')
+          end
+        }
+        params
+      end
+
     end
 
   end

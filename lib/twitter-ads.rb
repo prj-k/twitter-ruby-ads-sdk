@@ -27,6 +27,8 @@ require 'twitter-ads/resources/batch'
 require 'twitter-ads/http/request'
 require 'twitter-ads/http/response'
 
+require 'twitter-ads/restapi.rb'
+
 require 'twitter-ads/audiences/tailored_audience'
 
 require 'twitter-ads/campaign/app_list'
@@ -43,6 +45,7 @@ require 'twitter-ads/targeting_criteria/tv_market'
 require 'twitter-ads/targeting_criteria/tv_show'
 require 'twitter-ads/targeting_criteria/event'
 require 'twitter-ads/targeting_criteria/device'
+require 'twitter-ads/targeting_criteria/conversation'
 require 'twitter-ads/targeting_criteria/platform'
 require 'twitter-ads/targeting_criteria/platform_version'
 require 'twitter-ads/targeting_criteria/network_operator'
@@ -70,6 +73,7 @@ require 'twitter-ads/creative/video_website_card'
 require 'twitter-ads/creative/website_card'
 require 'twitter-ads/creative/poll_cards'
 require 'twitter-ads/creative/tweet_previews'
+require 'twitter-ads/creative/tweets'
 
 require 'twitter-ads/targeting/reach_estimate'
 
