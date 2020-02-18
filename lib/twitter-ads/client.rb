@@ -3,7 +3,7 @@
 
 module TwitterAds
 
-  API_VERSION = '5'
+  API_VERSION = '6'
 
   # The Ads API Client class which functions as a
   # container for basic API consumer information.
@@ -34,7 +34,7 @@ module TwitterAds
       @consumer_secret     = consumer_secret
       @access_token        = access_token
       @access_token_secret = access_token_secret
-      @options             = opts
+      @options             = opts.fetch(:options, {})
       validate
       self
     end
