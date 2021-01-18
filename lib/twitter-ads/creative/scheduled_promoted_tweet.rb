@@ -13,6 +13,7 @@ module TwitterAds
       attr_reader :account
 
       property :id, read_only: true
+      property :tweet_id, read_only: true
       property :created_at, type: :time, read_only: true
       property :updated_at, type: :time, read_only: true
       property :deleted, type: :bool, read_only: true
