@@ -101,7 +101,7 @@ module TwitterAds
       params.delete(:automatically_select_bid) if params.key?(:bid_type)
 
       # If set to true, bid_amount_local_micro must be NULL
-      params.store(:bid_amount_local_micro, nil) if params[:bid_type].to_s == Enum::BidType::AUTO.to_s && !self.id.nil?
+      params.store(:bid_amount_local_micro, nil) if params[:bid_type].to_s == Enum::BidStrategy::AUTO.to_s && !self.id.nil?
 
       # advertiser_user_id is currently beta-only and causes an error when sent.
       params.delete(:advertiser_user_id)
